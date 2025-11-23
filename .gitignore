@@ -39,7 +39,7 @@ xcuserdata/
 # Don't commit any secrets to the repo.
 .env
 .env.secret.toml
-# >>> claude-config
+
 # ===============================
 # General OS / editor clutter
 # ===============================
@@ -108,4 +108,3 @@ scratch/
 notes/drafts/
 __pycache__/
 *.pytest_cache/
-# <<< claude-config

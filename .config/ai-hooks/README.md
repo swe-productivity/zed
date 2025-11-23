@@ -4,7 +4,7 @@ Git hooks that prevent AI indicators from being committed to your repository.
 
 ## What These Hooks Block
 
-The hooks scan for over AI references including:
+The hooks scan for AI references including:
 
 - AI tool names (Claude, Cursor, Copilot, ChatGPT, Gemini, etc.)
 - AI-related phrases ("ai-generated", "ai-assisted", "generated with", etc.)
@@ -12,59 +12,51 @@ The hooks scan for over AI references including:
 - Company names (OpenAI, Anthropic, etc.)
 - Co-authorship markers (Co-Authored-By: Claude, noreply@anthropic.com, etc.)
 
+## Prerequisites
+
+Install [pre-commit](https://pre-commit.com/):
+
+```bash
+pip install pre-commit
+# or
+brew install pre-commit
+```
+
 ## Installation
 
-### For a Specific Repository
+### Single Repository
 
-1. Navigate to the root of the repository where you want to install the hooks:
+1. Navigate to your repository:
 
    ```bash
    cd /path/to/your/repo
    ```
 
-2. Run the installation script:
+2. Create or update `.pre-commit-config.yaml`:
 
-   ```bash
-   /path/to/onboarding/git-hooks-template/install-hooks.sh
+   ```yaml
+   repos:
+     - repo: local
+       hooks:
+         - id: ai-pre-commit
+           name: Block AI indicators in staged files
+           entry: python3 .config/ai-hooks/ai_guard.py pre-commit
+           language: system
+           pass_filenames: false
+           stages: [commit]
+         - id: ai-commit-msg
+           name: Block AI indicators in commit messages
+           entry: python3 .config/ai-hooks/ai_guard.py commit-msg
+           language: system
+           stages: [commit-msg]
    ```
 
-   Or if you're already in the onboarding directory:
+3. Install the hooks:
 
    ```bash
-   ./git-hooks-template/install-hooks.sh
+   pre-commit install
+   pre-commit install --hook-type commit-msg
    ```
-
-### Via `pre-commit`
-
-If you use the [pre-commit](https://pre-commit.com/) framework, add these local hooks to your configuration:
-
-```yaml
-repos:
-  - repo: local
-    hooks:
-      - id: ai-pre-commit
-        name: Block AI indicators in staged files
-        entry: python3 .config/ai-hooks/ai_guard.py pre-commit
-        language: system
-        pass_filenames: false
-        stages: [commit]
-      - id: ai-commit-msg
-        name: Block AI indicators in commit messages
-        entry: python3 .config/ai-hooks/ai_guard.py commit-msg
-        language: system
-        stages: [commit-msg]
-```
-
-Then install the hooks:
-
-```bash
-pre-commit install
-pre-commit install --hook-type commit-msg
-```
-
-You can automate this at scale with `python3 4_prep_repos/4_setup_hooks.py --root <path> --install`
-or push the configuration directly to GitHub using
-`python3 4_prep_repos/5_seed_precommit_remote.py --org <org> --dry-run`.
 
 ## How It Works
 

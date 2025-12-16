@@ -887,7 +887,17 @@ impl VariableList {
         };
 
         let variable_value = match &entry.entry {
-            DapEntry::Variable(dap) => dap.value.clone(),
+            DapEntry::Variable(dap) => {
+                let value = dap.value.as_str();
+                if value.len() >= 2
+                    && ((value.starts_with("'") && value.ends_with("'"))
+                        || (value.starts_with('"') && value.ends_with('"')))
+                {
+                    &value[1..value.len() - 1]
+                } else {
+                    value
+                }.replace("\\n", "\n")
+            },
             DapEntry::Watcher(watcher) => watcher.value.to_string(),
             DapEntry::Scope(_) => return,
         };

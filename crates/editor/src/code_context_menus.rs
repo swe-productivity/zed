@@ -867,10 +867,35 @@ impl CompletionsMenu {
 
                                 (range, highlight)
                             }),
-                        );
+                        )
+                        .collect::<Vec<_>>();
 
-                        let completion_label = StyledText::new(completion.label.text.clone())
-                            .with_default_highlights(&style.text, highlights);
+                        let filter_end = completion.label.filter_range.end;
+
+                        let new_text_label =
+                            StyledText::new(completion.label.text[..filter_end].to_string())
+                                .with_default_highlights(
+                                    &style.text,
+                                    highlights
+                                        .clone()
+                                        .into_iter()
+                                        .filter(|(range, _)| range.start < filter_end),
+                                );
+
+                        let type_label =
+                            StyledText::new(completion.label.text[filter_end..].to_string())
+                                .with_default_highlights(
+                                    &style.text,
+                                    highlights
+                                        .into_iter()
+                                        .filter(|(range, _)| range.start >= filter_end)
+                                        .map(|(range, highlight)| {
+                                            (
+                                                range.start - filter_end..range.end - filter_end,
+                                                highlight,
+                                            )
+                                        }),
+                                );
 
                         let documentation_label = match documentation {
                             Some(CompletionDocumentation::SingleLine(text))
@@ -931,7 +956,20 @@ impl CompletionsMenu {
                                         }
                                     }))
                                     .start_slot::<AnyElement>(start_slot)
-                                    .child(h_flex().overflow_hidden().child(completion_label))
+                                    .child(
+                                        h_flex()
+                                            .w_full()
+                                            .gap_8()
+                                            .justify_between()
+                                            .child(div().h_flex().gap_1().child(new_text_label))
+                                            .child(
+                                                div()
+                                                    .h_flex()
+                                                    .gap_1()
+                                                    .overflow_x_hidden()
+                                                    .child(type_label),
+                                            ),
+                                    )
                                     .end_slot::<Label>(documentation_label),
                             )
                     })
